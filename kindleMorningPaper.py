@@ -12,10 +12,23 @@ import datetime
 
 
 class MorningPaper:
-    """Kindle morning paper"""
+    """Kindle morning paper
+
+    Fetch rss feeds with the help of calibre recipes
+    and send the genrated mobi file to a kindle email
+    """
 
     def __init__(self, args):
-        """ init logging, read config """
+        """Initializes the MorningPaper object
+
+        creates a python logger and reads all values
+        from the config into class attributes.
+
+        Args:
+            args: command line arguments.
+                Must at least contain config and verbose attributes
+        """
+
         self.config = ConfigParser.SafeConfigParser()
 
         # init logging
@@ -56,7 +69,12 @@ class MorningPaper:
         self.mobifile = os.path.join(self.tempDownloadDir, mobifname)
 
     def download_feeds(self):
-        # get rss and convert to mobi
+        """ Get rss feeds and convert them to mobi
+
+        Uses calibres ebook-convert to download and convert
+        rss feeds specified by a calibre recipe.
+        """
+
         self.log.info("Downloading RSS feeds")
         calibre_rss_download_cmd = [self.ebook_convert, self.recipe,
                                     self.mobifile]
@@ -72,6 +90,12 @@ class MorningPaper:
             self.log.info("Finished downloading RSS feeds")
 
     def send_to_kindle(self):
+        """Send the created mobi file to the specified email addresses.
+
+        Uses calibre-smtp to send the downloaded and converted rss feeds
+        to a (kindle) email address.
+        """
+
         self.log.info("Sending papers")
         for kindle in self.kindlemails:
             self.log.debug("Sending papter to: " + kindle)
@@ -94,11 +118,18 @@ class MorningPaper:
             self._remove_mobi()
 
     def _remove_mobi(self):
+        """Remove the mobi file from the temporary directory
+
+        Gets only called if keepMobiFile config value is false
+        """
+
         os.remove(self.mobifile)
         self.log.debug("Removed mobifile: " + self.mobifile)
 
 
 def main(argv):
+    """main function"""
+
     # Build the command line options
     parser = argparse.ArgumentParser(description="Kindle Morning Paper")
     parser.add_argument('-c', '--config', default='kindleMorningPaper.cfg',
